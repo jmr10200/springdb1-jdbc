@@ -19,7 +19,7 @@ class MemberRepositoryV0Test {
     void crud() throws SQLException {
 
         // save
-        Member member = new Member("member0V0", 100100);
+        Member member = new Member("member1V0", 100100);
         repository.save(member);
 
         // findById
@@ -28,6 +28,11 @@ class MemberRepositoryV0Test {
         // 주의! Member 에는 Lombok 의 @Data 가 설정되어있다.
         // @Data 는 equals() 도 오버라이딩하고 있기 때문에 가능하다.
         assertThat(findMember).isEqualTo(member);
+
+        // update : money 변경
+        repository.update(member.getMemberId(), 21200);
+        Member updatedMember = repository.findById(member.getMemberId());
+        assertThat(updatedMember.getMoney()).isEqualTo(21200);
     }
 
 }
