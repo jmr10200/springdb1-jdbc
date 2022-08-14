@@ -14,6 +14,31 @@ import java.util.NoSuchElementException;
 public class MemberRepositoryV0 {
 
     /**
+     * 삭제
+     */
+    public void delete(String memberId) throws SQLException {
+        // SQL
+        String sql = "delete from member where member_id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+
+            // 삭제 실행
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("delete db error", e);
+            throw e;
+        } finally {
+            close(conn, pstmt, null);
+        }
+    }
+
+    /**
      * 수정
      */
     public void update(String memberId, int money) throws SQLException {
@@ -33,7 +58,7 @@ public class MemberRepositoryV0 {
             int resultSize = pstmt.executeUpdate();
             log.info("resultSize={}", resultSize);
         } catch (SQLException e) {
-            log.error("db error", e);
+            log.error("update db error", e);
             throw e;
         } finally {
             close(conn, pstmt, null);
@@ -70,7 +95,7 @@ public class MemberRepositoryV0 {
             }
 
         } catch (SQLException e) {
-            log.error("db error", e);
+            log.error("find db error", e);
             throw e;
         } finally {
             close(conn, pstmt, rs);
