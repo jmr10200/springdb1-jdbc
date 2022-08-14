@@ -5,6 +5,7 @@ import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
+import java.util.NoSuchElementException;
 
 /**
  * JDBC - DriverManager 사용
@@ -13,7 +14,46 @@ import java.sql.*;
 public class MemberRepositoryV0 {
 
     /**
-     * SQL
+     * 조회
+     */
+    public Member findById(String memberId) throws SQLException {
+        // memberId 로 조회하는 SQL 문
+        String sql = "select * from member where member_id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+
+            // 조회 실행
+            rs = pstmt.executeQuery(); // 쿼리 결과를 ResultSet 으로 리턴
+
+            // SQL 문에서 PK 로 데이터 하나만 취득하므로 while 아닌 if 문 사용한 것
+            if (rs.next()) {
+                Member member = new Member();
+                member.setMemberId(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            } else {
+                throw new NoSuchElementException("member not found memberId=" + memberId);
+            }
+
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            close(conn, pstmt, rs);
+
+        }
+
+    }
+
+    /**
+     * 등록
      */
     public Member save(Member member) throws SQLException {
         // INSERT 문 정의
@@ -87,3 +127,11 @@ public class MemberRepositoryV0 {
         return DBConnectionUtil.getConnection();
     }
 }
+
+/* ResultSet 구조 */
+// 보통 SELECT 쿼리의 결과가 순서대로 들어오며, 내부의 커서(cursor) 를 이용해서 데이터를 조회한다.
+// rs.next() : 호출시 커서가 다음으로 이동. 최초의 커서는 데이터를 가리키고 있지않으므로 최초 한번은 호출해야 데이터를 조회할 수 있다.
+//   - true : 커서의 이동 결과 데이터가 존재함
+//   - false : 커서의 이동 결과 데이터가 없음
+// rs.getString("member_id") : 현재 커서가 가리키고 있는 위치의 member_id 데이터를 String 으로 반환
+// rs.getInt("money") : 현재 커서가 가리키고 있는 위치의 money 데이터를 Int 로 반환
