@@ -1,9 +1,11 @@
 package hello.jdbc.connection;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -35,7 +37,7 @@ public class ConnectionTest {
 
     }
 
-    private void useDataSource(DriverManagerDataSource dataSource) throws SQLException {
+    private void useDataSource(DataSource dataSource) throws SQLException {
         // DataSource 로 커넥션 획득
         // 처음 DataSource 객체를 생성할 때만 파라미터를 넘긴다.
         Connection conn1 = dataSource.getConnection();
@@ -43,6 +45,25 @@ public class ConnectionTest {
 
         log.info("connection={}, class={}", conn1, conn1.getClass());
         log.info("connection={}, class={}", conn2, conn2.getClass());
+    }
+
+    @Test
+    void dataSourceConnectionPool() throws SQLException, InterruptedException {
+        // 커넥션 풀링 : HikariProxyConnection(Proxy) -> JdbcConnection(Target)
+        // HikariCP 커넥션 풀 사용 : HikariDataSource 는 DataSource 인터페이스 구현함
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(URL);
+        dataSource.setUsername(USERNAME);
+        dataSource.setPassword(PASSWORD);
+        dataSource.setMaximumPoolSize(10);
+        dataSource.setPoolName("MyPool");
+
+        useDataSource(dataSource);
+        // 커넥션 풀에서 커넥션 생성 시간 대기
+        // 커넥션 풀에서 커넥션을 생성하는 작업은 어플리케이션 실행 속도에 영향을 주지 않기 위해
+        // 별도의 쓰레드에서 작동한다. 그래서 테스트가 먼저 종료되어 버릴수 있다.
+        // 아래와 같이 대기시간을 주어야 쓰레드 풀에 커넥션이 생성되는 로그를 확인할 수 있다.
+        Thread.sleep(1000); // 1초
     }
 }
 /* 설정과 사용의 분리 */
@@ -86,3 +107,13 @@ public class ConnectionTest {
 // 커넥션 풀 구현기술을 변경하고 싶으면 구현체만 바꾸면 된다.
 // DriverManager 는 DataSource 를 사용하지 않는다. 그래서 DataSource 를 사용하도록 변경이 있을때, 코드를 고치지 않도록
 // 스프링은 DriverManager 도 DataSource 를 통해 사용할 수 있도록 DriverManagerDataSource 클래스를 제공한다.
+
+// 커넥션 풀 사용 HikariCP
+// 로그분석
+// HikariConfig : HikariCP 관련 설정 확인
+// MyPool connection adder : 별도의 쓰레드를 사용해서 커넥션 풀에 커넥션 추가하는 것 확인
+// -> 커넥션 생성하는 것은 상대적으로 오래걸리므로, 어플리케이션 실행시 풀 채울때까지 대기하면 어플리케이션 실행시간이 늘어난다.
+// -> 따라서 별도의 쓰레드를 통해 커넥션 풀을 채워야 어플리케이션 실행 시간에 영향을 주지 않는다.
+// 커넥션 풀에서 커넥션 획득 : 현 테스트에서는 2개 획득해서 리턴하지는 않았으므로, 2개를 가지고만 있다.
+// -> HikariPool - MyPool - After adding stats (total=10, active=2, idle=8, waiting=0)
+// -> 그래서 마지막 로그에서 사용중 2개(active=2), 대기중 8개(idle=8)를 확인할 수 있다.
