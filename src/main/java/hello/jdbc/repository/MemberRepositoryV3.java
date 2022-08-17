@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
  * 트랜젝션 - 트랜젝션 매니저
  * DataSourceUtils.getConnection()
  * DataSourceUtils.releaseConnection()
+ * Connection 을 파라미터로 전달하는 부분이 삭제된다.
  */
 @Slf4j
 public class MemberRepositoryV3 {
