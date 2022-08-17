@@ -65,7 +65,7 @@ class MemberServiceV3_1Test {
 
     @Test
     @DisplayName("예외 : 이체실패")
-    void accountTransferExceptio() throws SQLException {
+    void accountTransferException() throws SQLException {
         // given
         Member memberA = new Member(MEMBER_A, 10000);
         Member memberEx = new Member(MEMBER_EX, 10000);
