@@ -85,3 +85,24 @@ class MemberServiceV3_1Test {
         assertThat(findMemberEx.getMoney()).isEqualTo(10000);
     }
 }
+/* 트랜젝션 매니저2 */
+// 흐름 이해
+// 클라이언트 요청으로 서비스 로직 실행
+// 서비스 계층에서 트랜젝션 시작 : transactionManger.getTransaction()
+// 트랜젝션 매니저는 datasource 사용하여 connection 생성
+// connection 을 수동 커밋으로 설정후 트랜젝션 시작
+// connection 을 트랜젝션 동기화 매니저에 저장
+// 트랜젝션 동기화 매니저는 ThreadLocal 에 보관 (멀티 쓰레드 환경에 안전하게 커넥션 보관)
+// 서비스가 비즈니스 로직 실행하면, 리포지토리가 실행 (커넥션 파라미터 전달 x)
+// 리포지토리는 DataSourceUtils.getConnection() 으로 트랜젝션 동기화 매니저에서 커넥션 꺼내 사용
+// 비즈니스 로직 종료시 트랜젝션 동기화 매니저 통해 동기화된 커넥션을 획득하여 커밋 또는 롤백 실행
+// 전체 리소스 정리
+//   트랜젝션 동기화 매니저 정리 (ThreadLocal 은 사용 후 꼭 정리해야 함)
+//   conn.setAutoCommit(true) 오토커밋 되돌리기, (커넥션 풀 고려하기 위함)
+//   conn.close() 커넥션 종료 (커넥션 풀이면 커넥션 풀에 반환된다)
+
+// 정리
+// 트랜젝션 추상화 덕분에 JDBC 코드에 의존하지 않는다.
+// 이후 DB 변경되면 DataSourceTransactionManager 에서 JpaTransactionManager 등으로 변경
+// java.sql.SQLException 은 리포지토리에서 런타임으로 던져줘야 한다.
+// 트랜젝션 동기화 매니저 덕분에 Connection 을 파라미터로 넘기지 않아도 된다.
