@@ -25,7 +25,7 @@ public class MemberServiceV1 {
 
     private void validate(Member toMember) {
         if (toMember.getMemberId().equals("ex")) {
-            throw new IllegalStateException("이제충 예외 발생");
+            throw new IllegalStateException("이제중 예외 발생");
         }
     }
 }
