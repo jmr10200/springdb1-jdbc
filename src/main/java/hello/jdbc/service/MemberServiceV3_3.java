@@ -59,3 +59,18 @@ public class MemberServiceV3_3 {
 // @Aspect 어드바이저: BeanFactoryTransactionAttributeSourceAdvisor
 // @Pointcut 포인트컷: TransactionAttributeSourcePointcut
 // @Advice 어드바이스: TransactionInterceptor
+
+/* 선언적 트랜젝션 관리 (Declarative Transaction Management) */
+// @Transactional 어노테이션 하나만 선언해서 편리하게 트랜젝션을 적용하는 것
+// 과거 XML 에 설정하기도 했다. 해당 로직에 트랜젝션을 적용하겠다고 선언하면 적용되는 방식이다.
+/* 프로그래밍 방식 트랜젝션 관리 (Programmatic Transaction Management) */
+// 트랜젝션 매니저 또는 트랜젝션 템플릿 등을 사용하여 트랜젝션 관련 코드를 직접 작성하는 것
+
+// 선언적 트랜젝션 관리가 프로그래밍 방식에 비해서 훨씬 간편하고 실용적이기 때문에 실무에서는 대부분 선언적 사용
+// 프로그래밍 방식의 트랜젝션 관리는 스프링 컨테이너나 스프링 AOP 기술 없이 간단히 사용할 수 있지만,
+// 실무에서는 대부분 스프링 컨테이너와 AOP 를 사용하기 때문에 거의 사용되지 않는다.
+// 프로그래밍 방식 트랜젝션 관리는 테스트시에 이용되기는 한다.
+
+// 정리
+// 스프링이 제공하는 선언적 트랜젝션 관리를 이용하면 서비스 계층에서 순수한 비즈니스 로직만 남길 수 있다.
+// @Transactional 어노테이션 하나만 추가하면 된다. 나머지는 스프링 트랜젝션 AOP 가 알아서 처리해준다
