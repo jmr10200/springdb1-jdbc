@@ -36,7 +36,7 @@ public class CheckedTest {
     }
 
     /**
-     * Checked Exception 는 예외를 잡아서 처리하거나, 던져야 한다.
+     * Checked Exception 는 예외를 catch 또는 throw 해야한다.
      */
     private class Service {
 
