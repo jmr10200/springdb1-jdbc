@@ -29,7 +29,10 @@ public class UncheckedAppTest {
         try {
             controller.request();
         } catch (Exception e) {
+            // 예외를 전환할 때는 꼭! 기존 예외를 포함해야 로그에서 확인 할 수 있다.
             log.error("ex", e);
+            // log 파라미터의 마지막에 예외 파라미터(여기서는 e) 를 넘기면 stacktrace 출력된다.
+            // 참고 : System.out 에 출력은 e.printStackTrace() 를 사용하자
         }
     }
 
